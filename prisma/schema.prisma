@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Lecturer {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  firstName    String
+  lastName     String
+  email        String   @unique
+  password     String?
+  refreshToken String?
+  courses      Course[]
+}
+
+model Student {
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  firstName    String
+  lastName     String
+  matricNumber String       @unique
+  level        Level        @default(ND1)
+  session      String
+  gender       Gender       @default(MALE)
+  attendances  Attendance[]
+}
+
+model Course {
+  id          String       @id @default(uuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  courseTitle String
+  courseCode  String       @unique
+  semester    Semester     @default(FIRST)
+  level       Level
+  lecturer    Lecturer?    @relation(fields: [lecturerId], references: [id])
+  lecturerId  String?
+  attendances Attendance[]
+}
+
+model Attendance {
+  id               String           @id @default(uuid())
+  dayMarked        DateTime         @default(now()) @db.Date
+  updatedAt        DateTime         @updatedAt
+  session          String
+  course           Course           @relation(fields: [courseId], references: [id])
+  courseId         String
+  student          Student          @relation(fields: [studentId], references: [id])
+  studentId        String
+  attendanceStatus AttendanceStatus
+}
+
+enum Level {
+  ND1
+  ND2
+  HND1
+  HND2
+}
+
+enum Semester {
+  FIRST
+  SECOND
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AttendanceStatus {
+  ABSENT
+  PRESENT
+}
